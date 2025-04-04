@@ -1,0 +1,45 @@
+// defining sensor pins
+const int tempSensorPin = A0;  // Temperature sensor (simulated with potentiometer)
+const int ldrSensorPin = A1;   // photoresistor
+
+// LED O/p Pins
+const int nightLed = 5;    // Red LED - Night detected
+const int lightLed = 6;    // Yellow LED - Streetlights ON
+
+// Threshold values (Adjust based on testing)
+const int tempThreshold = 200;  // Low temp = Night
+const int ldrThreshold = 100;   // Low light = Turn ON streetlights
+
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode(nightLed, OUTPUT);
+  pinMode(lightLed, OUTPUT);
+}
+
+void loop() {
+  int tempValue = analogRead(tempSensorPin);  // temperature reading
+  int ldrValue = analogRead(ldrSensorPin);    // photoresistor value reading
+
+  // Print sensor values
+  Serial.print("Temp: "); Serial.print(tempValue);
+  Serial.print(" | LDR: "); Serial.println(ldrValue);
+
+  // Night Detection Logic (Low Temp)
+  if (tempValue < tempThreshold) {
+    digitalWrite(nightLed, HIGH);  // Turn on Red LED (Night Detected)
+    
+    // If it's also dark, turn on streetlights
+    if (ldrValue < ldrThreshold) {
+      digitalWrite(lightLed, HIGH);  // Turn on Yellow LED (Streetlight ON)
+    } else {
+      digitalWrite(lightLed, LOW);   // Keep streetlights OFF
+    }
+
+  } else {
+    digitalWrite(nightLed, LOW);  // It's daytime, turn off Red LED
+    digitalWrite(lightLed, LOW);  // Turn off streetlights
+  }
+
+  delay(500); 
+}

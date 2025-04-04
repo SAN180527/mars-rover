@@ -1,0 +1,46 @@
+// Defining sensor pins
+const int tempSensor = A0;
+const int soilSensor = A1;
+const int switchPin = 8;  // Slide Switch (Watertap control)
+const int ledPin = 9;     // LED Indicator
+
+// Threshold values
+const float tempThreshold = 30.0;  // Temperature (Celsius)
+const int moistureThreshold = 500; // Moisture level (Lower = Dry)
+
+void setup() {
+    pinMode(switchPin, OUTPUT);
+    pinMode(ledPin, OUTPUT);
+    digitalWrite(switchPin, LOW);  // switch is off initially
+    digitalWrite(ledPin, LOW);     // led is off initially
+    Serial.begin(9600);
+}
+
+void loop() {
+    // Read Temperature Sensor (TMP36)
+    int tempReading = analogRead(tempSensor);
+    float voltage = tempReading * (5.0 / 1023.0);
+    float temperature = (voltage - 0.5) * 100;  // Convert to Celsius
+
+    // Read Soil Moisture Sensor
+    int soilMoisture = analogRead(soilSensor);
+
+    // Print sensor values to Serial Monitor
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.print("C, Soil Moisture: ");
+    Serial.println(soilMoisture);
+
+    //conditions to turn ON/OFF water tap & LED
+    if (temperature > tempThreshold || soilMoisture < moistureThreshold) {
+        digitalWrite(switchPin, HIGH);  // Open tap
+        digitalWrite(ledPin, HIGH);     // Turn ON led
+        Serial.println("watering the soil(Slide Switch Activated, LED ON)");
+    } else {
+        digitalWrite(switchPin, LOW);   // Close tap
+        digitalWrite(ledPin, LOW);      // Turn OFF led
+        Serial.println("watering is not neeed(Slide Switch OFF, LED OFF)");
+    }
+
+    delay(5000);  // Wait 5 seconds before next check
+}

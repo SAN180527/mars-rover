@@ -1,0 +1,62 @@
+const int sigPin = 9;  // signal pin of the ultrasonic sensor
+const int tempSensorPin = A0;  // temperature sensor
+const int buzzerPin = 7;
+const int greenLEDPin = 6; //for detection of object
+const int redLEDPin = 5; //for detection of temp
+const int moveLEDPin = 8;  //lights up if its safe to be approched i.e, within required distance an not too hot
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(sigPin, OUTPUT);
+  pinMode(tempSensorPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(greenLEDPin, OUTPUT);
+  pinMode(redLEDPin, OUTPUT);
+  pinMode(moveLEDPin, OUTPUT);
+}
+
+void loop() {
+  // Measure distance
+  pinMode(sigPin, OUTPUT);
+  digitalWrite(sigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(sigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(sigPin, LOW);
+  pinMode(sigPin, INPUT);
+  int duration = pulseIn(sigPin, HIGH);
+  int distance = duration * 0.034 / 2;  // Convert to cm
+
+  // Read temperature
+  int tempReading = analogRead(tempSensorPin);
+  float voltage = tempReading * (5.0 / 1023.0);
+  float temperature = (voltage - 0.5) * 100.0;
+
+  Serial.print("Distance: "); Serial.print(distance); Serial.print(" cm, ");
+  Serial.print("Temperature: "); Serial.print(temperature); Serial.println(" C");
+
+  // Decision making
+  if (distance < 20) {  // Object detected
+    if (temperature < 35) {  // Safe temperature
+      digitalWrite(greenLEDPin, HIGH);
+      digitalWrite(redLEDPin, LOW);
+      digitalWrite(buzzerPin, LOW);
+      digitalWrite(moveLEDPin, HIGH);  //movement is allowed
+      Serial.println("Safe to move forward");
+    } else {  // Too hot
+      digitalWrite(greenLEDPin, LOW);
+      digitalWrite(redLEDPin, HIGH);
+      digitalWrite(buzzerPin, HIGH);
+      digitalWrite(moveLEDPin, LOW);  //no movement
+      Serial.println("temp is too high, will not move towards it");
+    }
+  } else {  // No object detected
+    digitalWrite(greenLEDPin, LOW);
+    digitalWrite(redLEDPin, LOW);
+    digitalWrite(buzzerPin, LOW);
+    digitalWrite(moveLEDPin, LOW);  // No movement
+    Serial.println("No object detected");
+  }
+
+  delay(500);
+}
